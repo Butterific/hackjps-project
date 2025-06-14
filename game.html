@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Game Outcome</title>
+    <title>AI Survival Game</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
@@ -13,7 +13,7 @@
             color: #e2e8f0; /* Light text */
             display: flex;
             justify-content: center;
-            align-items: center; /* Center content vertically */
+            align-items: flex-start; /* Align to top to allow scrolling if content is long */
             min-height: 100vh;
             padding: 20px;
             box-sizing: border-box;
@@ -29,38 +29,25 @@
             flex-direction: column;
             gap: 1.5rem;
         }
-        .outcome-box {
-            padding: 1.5rem;
+        .btn-primary {
+            background-color: #48bb78; /* Green */
+            color: white;
+            padding: 0.75rem 1.5rem;
             border-radius: 0.75rem;
             font-weight: 600;
-            text-align: center;
-            transition: all 0.3s ease-in-out;
-            border: 1px solid;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-            margin-top: 1rem;
-            margin-bottom: 1rem;
+            transition: background-color 0.2s;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border: none;
         }
-        .outcome-survive {
-            background-color: #2f855a; /* Dark green */
-            border-color: #48bb78; /* Green border */
-            color: #e2e8f0;
+        .btn-primary:hover:not(:disabled) {
+            background-color: #38a169;
         }
-        .outcome-die {
-            background-color: #c53030; /* Dark red */
-            border-color: #e53e3e; /* Red border */
-            color: #e2e8f0;
+        .btn-primary:disabled {
+            background-color: #4a5568; /* Grayed out when disabled */
+            cursor: not-allowed;
         }
-        .outcome-error {
-            background-color: #9b2c2c; /* Darker red for error */
-            border-color: #e53e3e; /* Red border */
-            color: #e2e8f0;
-        }
-        .explanation-text {
-            font-weight: 400;
-            margin-top: 0.5rem;
-            color: #cbd5e0;
-        }
-        .btn-play-again {
+        .btn-secondary {
             background-color: #63b3ed; /* Blue */
             color: white;
             padding: 0.75rem 1.5rem;
@@ -70,94 +57,396 @@
             cursor: pointer;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             border: none;
-            margin-top: 1.5rem;
         }
-        .btn-play-again:hover {
+        .btn-secondary:hover:not(:disabled) {
             background-color: #4299e1;
         }
-        .difficulty-display {
-            font-size: 1.125rem; /* text-lg */
-            font-weight: 600; /* font-semibold */
-            color: #9ae6b4; /* A light green color for easy distinction */
+        .btn-secondary:disabled {
+            background-color: #4a5568; /* Grayed out when disabled */
+            cursor: not-allowed;
+        }
+        textarea {
+            background-color: #4a5568; /* Darker input background */
+            border: 1px solid #718096;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            color: #e2e8f0;
+            resize: vertical; /* Allow vertical resize */
+        }
+        textarea:focus {
+            outline: none;
+            border-color: #63b3ed;
+            box-shadow: 0 0 0 3px rgba(99, 179, 237, 0.5);
+        }
+        .loading-spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid #48bb78;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            vertical-align: middle;
+            margin-right: 8px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        /* Outcome box styles removed as they are now in outcome.html */
+        #timer-display {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #f6ad55; /* Orange for timer */
             text-align: center;
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+        }
+        .difficulty-options {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
             margin-bottom: 1rem;
-            text-transform: capitalize; /* Capitalize the first letter */
+        }
+        .difficulty-option input[type="radio"] {
+            display: none;
+        }
+        .difficulty-option label {
+            background-color: #4a5568;
+            color: #e2e8f0;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s;
+            border: 1px solid #718096;
+        }
+        .difficulty-option input[type="radio"]:checked + label {
+            background-color: #48bb78; /* Green for selected */
+            border-color: #38a169;
+            transform: translateY(-2px);
+        }
+        .difficulty-option label:hover {
+            background-color: #616e7e;
         }
     </style>
 </head>
 <body class="selection:bg-green-300 selection:text-green-900">
     <div class="container">
-        <h1 class="text-3xl font-bold text-center text-white mb-4">Game Result</h1>
+        <h1 class="text-3xl font-bold text-center text-white mb-4">AI Survival Game</h1>
 
-        <div class="bg-gray-700 p-6 rounded-xl shadow-lg">
-            <h2 class="text-xl font-semibold text-white mb-2">Difficulty:</h2>
-            <p id="difficulty-display" class="difficulty-display"></p>
-        </div>
+        <div id="game-area" class="flex flex-col gap-6">
+            <div class="bg-gray-700 p-6 rounded-xl shadow-lg">
+                <h2 class="text-xl font-semibold text-white mb-2">Difficulty:</h2>
+                <div class="difficulty-options">
+                    <div class="difficulty-option">
+                        <input type="radio" id="difficulty-easy" name="difficulty" value="easy" checked>
+                        <label for="difficulty-easy">Easy</label>
+                    </div>
+                    <div class="difficulty-option">
+                        <input type="radio" id="difficulty-medium" name="difficulty" value="medium">
+                        <label for="difficulty-medium">Medium</label>
+                    </div>
+                    <div class="difficulty-option">
+                        <input type="radio" id="difficulty-hard" name="difficulty" value="hard">
+                        <label for="difficulty-hard">Hard</label>
+                    </div>
+                </div>
+            </div>
 
-        <div class="bg-gray-700 p-6 rounded-xl shadow-lg">
-            <h2 class="text-xl font-semibold text-white mb-2">Scenario:</h2>
-            <p id="scenario-display" class="text-lg text-gray-200"></p>
-        </div>
+            <div class="bg-gray-700 p-6 rounded-xl shadow-lg">
+                <h2 class="text-xl font-semibold text-white mb-2">Scenario:</h2>
+                <p id="scenario-display" class="text-lg text-gray-200 min-h-[4rem] flex items-center justify-center text-center">
+                    <span class="loading-spinner" id="scenario-loading" style="display: none;"></span>
+                    <span id="scenario-text">Click "Start New Game" to generate a scenario.</span>
+                </p>
+            </div>
 
-        <div class="bg-gray-700 p-6 rounded-xl shadow-lg">
-            <h2 class="text-xl font-semibold text-white mb-2">Your Strategy:</h2>
-            <p id="strategy-display" class="text-lg text-gray-200"></p>
-        </div>
-
-        <div id="outcome-display" class="outcome-box">
-            <p class="text-2xl" id="outcome-text"></p>
-            <p class="explanation-text" id="explanation-text"></p>
-        </div>
-
-        <div class="flex justify-center mt-4">
-            <button id="play-again-btn" class="btn-play-again">Play Again</button>
+            <div class="bg-gray-700 p-6 rounded-xl shadow-lg">
+                <h2 class="text-xl font-semibold text-white mb-2">Your Strategy:</h2>
+                <div id="timer-display">90s</div>
+                <textarea id="strategy-input" rows="5" placeholder="Describe how you would survive this scenario..."
+                          class="w-full text-base focus:ring-2 focus:ring-blue-300"></textarea>
+                <div class="flex justify-center mt-4 gap-4">
+                    <button id="submit-strategy-btn" class="btn-primary" disabled>
+                        <span class="loading-spinner" id="submit-loading" style="display: none;"></span>
+                        Submit Strategy
+                    </button>
+                </div>
+            </div>
+            
+            <div class="flex justify-center mt-4">
+                <button id="new-game-btn" class="btn-secondary">Start New Game</button>
+            </div>
         </div>
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const scenarioDisplay = document.getElementById('scenario-display');
-            const strategyDisplay = document.getElementById('strategy-display');
-            const outcomeDisplay = document.getElementById('outcome-display');
-            const outcomeText = document.getElementById('outcome-text');
-            const explanationText = document.getElementById('explanation-text');
-            const difficultyDisplay = document.getElementById('difficulty-display'); // New element
-            const playAgainBtn = document.getElementById('play-again-btn');
+    <script type="module">
+        // Import the AI related functions from the separate ai.js file
+        import { callGeminiAPI } from './ai.js';
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-            const gameOutcomeString = sessionStorage.getItem('gameOutcome');
+        // Firebase Configuration (provided globally by the Canvas environment)
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-ai-survival-game-app-id'; // Fallback for local testing
 
-            if (gameOutcomeString) {
-                const gameOutcome = JSON.parse(gameOutcomeString);
+        let app;
+        let auth;
+        let db;
 
-                scenarioDisplay.textContent = gameOutcome.scenario;
-                strategyDisplay.textContent = gameOutcome.strategy;
-                outcomeText.textContent = `You ${gameOutcome.outcome.toUpperCase()}!`;
-                explanationText.textContent = gameOutcome.explanation;
-                difficultyDisplay.textContent = gameOutcome.difficulty ? `Difficulty: ${gameOutcome.difficulty}` : 'Difficulty: N/A'; // Display difficulty
+        // Initialize Firebase
+        if (Object.keys(firebaseConfig).length > 0) {
+            app = initializeApp(firebaseConfig);
+            auth = getAuth(app);
+            db = getFirestore(app);
 
-                // Apply styling based on outcome
-                if (gameOutcome.outcome === 'survive') {
-                    outcomeDisplay.classList.add('outcome-survive');
-                } else if (gameOutcome.outcome === 'die') {
-                    outcomeDisplay.classList.add('outcome-die');
-                } else if (gameOutcome.outcome === 'error') {
-                    outcomeDisplay.classList.add('outcome-error');
+            // Sign in anonymously using the initial auth token if available
+            async function authenticateFirebase() {
+                try {
+                    const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+                    if (initialAuthToken) {
+                        await signInWithCustomToken(auth, initialAuthToken);
+                        console.log("Signed in with custom token.");
+                    } else {
+                        await signInAnonymously(auth);
+                        console.log("Signed in anonymously.");
+                    }
+                } catch (error) {
+                    console.error("Firebase authentication error:", error);
+                    // You might want to display a user-friendly message about authentication issues
                 }
-            } else {
-                // Fallback if no game data is found (e.g., user directly navigated)
-                scenarioDisplay.textContent = "No scenario data found.";
-                strategyDisplay.textContent = "No strategy data found.";
-                outcomeText.textContent = "No outcome found.";
-                explanationText.textContent = "It seems you navigated here directly or the game data was lost.";
-                difficultyDisplay.textContent = "Difficulty: Unknown";
-                outcomeDisplay.classList.add('outcome-error'); // Default to error style
+            }
+            authenticateFirebase();
+        } else {
+            console.warn("Firebase config not found. Running without Firebase features.");
+            // For scenarios where Firebase isn't strictly necessary for core functionality (like this game),
+            // you can allow it to run without auth, but for persistent data, Firebase is essential.
+        }
+
+        // DOM Elements
+        const scenarioDisplay = document.getElementById('scenario-text');
+        const scenarioLoadingSpinner = document.getElementById('scenario-loading');
+        const strategyInput = document.getElementById('strategy-input');
+        const submitStrategyBtn = document.getElementById('submit-strategy-btn');
+        const submitLoadingSpinner = document.getElementById('submit-loading');
+        const newGameBtn = document.getElementById('new-game-btn');
+        const timerDisplay = document.getElementById('timer-display');
+        const difficultyRadios = document.querySelectorAll('input[name="difficulty"]'); // New element selector
+
+        let currentScenario = ''; // Store the current scenario
+        let timerInterval; // To hold the interval ID for the timer
+        let timeLeft;
+        let selectedDifficulty = 'easy'; // Default difficulty
+
+        // Define initial times for each difficulty
+        const difficultyTimes = {
+            easy: 120, // 2 minutes
+            medium: 90,  // 1.5 minutes
+            hard: 60   // 1 minute
+        };
+
+        // Helper function to show/hide loading spinners
+        function showLoading(element, spinner) {
+            element.disabled = true;
+            spinner.style.display = 'inline-block';
+        }
+
+        function hideLoading(element, spinner) {
+            element.disabled = false;
+            spinner.style.display = 'none';
+        }
+
+        // Function to start the timer
+        function startTimer() {
+            clearInterval(timerInterval); // Clear any existing timer
+            timeLeft = difficultyTimes[selectedDifficulty]; // Set time based on difficulty
+            timerDisplay.textContent = `${timeLeft}s`;
+            timerDisplay.style.color = '#f6ad55'; // Reset color
+
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                timerDisplay.textContent = `${timeLeft}s`;
+
+                if (timeLeft <= 10) {
+                    timerDisplay.style.color = '#fc8181'; // Turn red when low
+                }
+
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    timerDisplay.textContent = "Time's Up!";
+                    handleTimerEnd();
+                }
+            }, 1000);
+        }
+
+        // Function to stop the timer
+        function stopTimer() {
+            clearInterval(timerInterval);
+            timerDisplay.textContent = `${difficultyTimes[selectedDifficulty]}s`; // Reset display to current difficulty's time
+            timerDisplay.style.color = '#f6ad55'; // Reset color
+        }
+
+        // Function to handle what happens when the timer ends
+        function handleTimerEnd() {
+            strategyInput.disabled = true;
+            submitStrategyBtn.disabled = true;
+            // Disable difficulty selection when game is in progress or ended
+            difficultyRadios.forEach(radio => radio.disabled = true);
+
+            const outcomeData = {
+                scenario: currentScenario,
+                strategy: strategyInput.value.trim() || "No strategy entered.",
+                outcome: "die",
+                explanation: "Time ran out before you could formulate a strategy. You succumbed to the elements."
+            };
+            sessionStorage.setItem('gameOutcome', JSON.stringify(outcomeData));
+            window.location.href = 'outcome.html'; // Redirect to outcome page
+        }
+
+        // Function to generate a new survival scenario
+        async function generateScenario() {
+            stopTimer(); // Ensure any running timer is stopped
+            showLoading(newGameBtn, scenarioLoadingSpinner);
+            scenarioDisplay.textContent = ''; // Clear previous scenario text
+            scenarioDisplay.appendChild(scenarioLoadingSpinner); // Ensure spinner is inside
+
+            // Reset UI for new game
+            strategyInput.value = '';
+            strategyInput.disabled = false;
+            submitStrategyBtn.disabled = true; // Disabled until scenario loads and user types
+            sessionStorage.removeItem('gameOutcome'); // Clear any old outcome data
+            
+            // Enable difficulty selection for a new game
+            difficultyRadios.forEach(radio => radio.disabled = false);
+
+            let scenarioPrompt = "";
+            switch (selectedDifficulty) {
+                case 'easy':
+                    scenarioPrompt = "Generate a straightforward survival scenario. It should have clear objectives and obvious resources, designed for easy problem-solving. The scenario should be 2-3 sentences long.";
+                    break;
+                case 'medium':
+                    scenarioPrompt = "Generate a challenging and confusing survival scenario. Include multiple ambiguous threats or environmental factors, limited resources with unclear utility, and present a complex problem that requires critical thinking. The scenario should be 3-5 sentences long, leaving room for interpretation.";
+                    break;
+                case 'hard':
+                    scenarioPrompt = "Generate an extremely difficult and obscure survival scenario. It must contain paradoxical threats, minimal or misleading resources, and demand highly creative and unconventional solutions. The scenario should be 4-6 sentences, designed to be highly ambiguous and potentially unwinnable through conventional means.";
+                    break;
+                default:
+                    scenarioPrompt = "Generate a basic survival scenario."; // Fallback
+            }
+            
+            try {
+                // Call the AI function from ai.js
+                currentScenario = await callGeminiAPI(scenarioPrompt);
+                scenarioDisplay.textContent = currentScenario;
+                // Enable submit if strategy is already typed
+                if (strategyInput.value.trim().length > 0) {
+                    submitStrategyBtn.disabled = false;
+                }
+                startTimer(); // Start the timer once the scenario is loaded
+                // Disable difficulty selection once scenario is generated and timer starts
+                difficultyRadios.forEach(radio => radio.disabled = true);
+
+            } catch (error) {
+                scenarioDisplay.textContent = "Error generating scenario. Please check your connection.";
+                console.error("Error generating scenario:", error);
+                // Re-enable difficulty selection on error to allow user to try again
+                difficultyRadios.forEach(radio => radio.disabled = false);
+            } finally {
+                hideLoading(newGameBtn, scenarioLoadingSpinner);
+                // Ensure spinner is removed from scenarioDisplay if it was added
+                if (scenarioDisplay.contains(scenarioLoadingSpinner)) {
+                    scenarioDisplay.removeChild(scenarioLoadingSpinner);
+                }
+            }
+        }
+
+        // Function to submit the user's strategy and get AI's judgment
+        async function submitStrategy() {
+            stopTimer(); // Stop the timer immediately on submission
+
+            const userStrategy = strategyInput.value.trim();
+            if (!userStrategy) {
+                // Using custom modal instead of alert in a real application
+                alert("Please enter your survival strategy!");
+                return;
             }
 
-            playAgainBtn.addEventListener('click', () => {
-                sessionStorage.removeItem('gameOutcome'); // Clear data
-                window.location.href = 'game.html'; // Redirect to the main game page (game.html)
+            showLoading(submitStrategyBtn, submitLoadingSpinner);
+            strategyInput.disabled = true; // Disable input while waiting for response
+            difficultyRadios.forEach(radio => radio.disabled = true); // Ensure difficulty stays disabled
+
+            const prompt = `Given the following survival scenario: '${currentScenario}'. The user's proposed strategy is: '${userStrategy}'. Based on this, determine if the user 'survives' or 'dies'. Provide a concise explanation (1-2 sentences) for the outcome. Respond only with a JSON object like this: {'outcome': 'survive' or 'die', 'explanation': 'your explanation here'}.`;
+            const responseSchema = {
+                type: "OBJECT",
+                properties: {
+                    "outcome": { "type": "STRING", "enum": ["survive", "die"] },
+                    "explanation": { "type": "STRING" }
+                },
+                required: ["outcome", "explanation"]
+            };
+
+            try {
+                // Call the AI function from ai.js for structured response
+                const parsedJson = await callGeminiAPI(prompt, true, responseSchema);
+
+                const outcomeData = {
+                    scenario: currentScenario,
+                    strategy: userStrategy,
+                    outcome: parsedJson.outcome,
+                    explanation: parsedJson.explanation,
+                    difficulty: selectedDifficulty // Pass difficulty to outcome page
+                };
+                sessionStorage.setItem('gameOutcome', JSON.stringify(outcomeData));
+                window.location.href = 'outcome.html'; // Redirect to outcome page
+
+            } catch (error) {
+                console.error("Error determining outcome:", error);
+                // If API call fails, still redirect but with an error message
+                const outcomeData = {
+                    scenario: currentScenario,
+                    strategy: userStrategy,
+                    outcome: "error", // Indicate an error state
+                    explanation: "An error occurred while determining your fate. Please try again.",
+                    difficulty: selectedDifficulty
+                };
+                sessionStorage.setItem('gameOutcome', JSON.stringify(outcomeData));
+                window.location.href = 'outcome.html'; // Redirect to outcome page
+            } finally {
+                hideLoading(submitStrategyBtn, submitLoadingSpinner);
+            }
+        }
+
+        // Event Listeners
+        newGameBtn.addEventListener('click', generateScenario);
+        submitStrategyBtn.addEventListener('click', submitStrategy);
+
+        // Event listener for difficulty selection
+        difficultyRadios.forEach(radio => {
+            radio.addEventListener('change', (event) => {
+                selectedDifficulty = event.target.value;
+                stopTimer(); // Reset timer display when difficulty changes
             });
         });
+
+        // Enable/disable submit button based on strategy input and scenario presence
+        strategyInput.addEventListener('input', () => {
+            if (strategyInput.value.trim().length > 0 && currentScenario && timeLeft > 0) {
+                submitStrategyBtn.disabled = false;
+            } else {
+                submitStrategyBtn.disabled = true;
+            }
+        });
+
+        // Initial setup on page load
+        window.onload = function() {
+            // Set initial timer display based on default difficulty
+            timerDisplay.textContent = `${difficultyTimes[selectedDifficulty]}s`;
+            // The "Start New Game" button is ready to be clicked to begin.
+            // Ensure difficulty radios are enabled on load
+            difficultyRadios.forEach(radio => radio.disabled = false);
+        };
+
     </script>
 </body>
 </html>
