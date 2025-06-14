@@ -32,7 +32,7 @@
             z-index: -1; /* Send behind content */
             background-size: cover;
             object-fit: cover; /* Ensure video covers entire area */
-            filter: brightness(0.4) grayscale(0.3); /* Darken and desaturate video slightly for contrast */
+            filter: brightness(0.7); /* Adjusted: Brighter video, removed grayscale */
         }
         .h1 {
             font-size: 60px; /* Set font size to 32px */
@@ -103,8 +103,9 @@
     </style>
 </head>
 <body class="selection:bg-green-300 selection:text-green-900">
-    <video width="500" height="400" autoplay loop muted playsinline id="background-video" control>
+    <video autoplay loop muted playsinline id="background-video">
         <source src="loading.mp4" type="video/mp4">
+        Your browser does not support the video tag.
     </video>
 
     <h1 class="h1">Type Your FATE!</h1>
