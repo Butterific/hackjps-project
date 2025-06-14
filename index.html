@@ -1,13 +1,127 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <title>Hello, World!</title>
-    <link rel="stylesheet" href="styles.css" />
-  </head>
-  <body>
-      <h1> <center> <class="title"> Welcome to Fate AI </center> </h1>
-      <script src="script.js"></script>
-      <h4>  </h4>
-      
-  </body>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Type Your Fate - Start</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Comic Sans MS', 'Comic Sans', cursive; /* Changed font to Comic Sans */
+            background-color: #000000; /* Solid black fallback background for video */
+            color: #e2e8f0; /* Light text */
+            display: flex;
+            justify-content: center; /* Centers container horizontally */
+            align-items: center; /* Centers container vertically */
+            min-height: 100vh;
+            padding: 40px; /* Padding for the overall content area */
+            box-sizing: border-box;
+            position: relative; /* Needed for absolute positioning of h1 and video */
+            overflow: hidden;
+        }
+        /* Video background styling */
+        #background-video {
+            position: fixed; /* Keep video fixed in background */
+            right: 0;
+            bottom: 0;
+            min-width: 100%;
+            min-height: 100%;
+            width: auto;
+            height: auto;
+            z-index: -1; /* Send behind content */
+            background-size: cover;
+            object-fit: cover; /* Ensure video covers entire area */
+            filter: brightness(0.4) grayscale(0.3); /* Darken and desaturate video slightly for contrast */
+        }
+        .h1 {
+            font-size: 60px; /* Set font size to 32px */
+            font-weight: 800;
+            color: lightgreen;
+            text-shadow: none;
+            text-align: center;
+            width: 100%; /* Ensure it spans full width for horizontal centering */
+            position: absolute; /* Position independently of flexbox */
+            top: 50px; /* Moves title slightly away from the top edge */
+            left: 50%; /* Start at 50% from left */
+            transform: translateX(-50%); /* Pull back by half its width for true horizontal center */
+            z-index: 2; /* Ensure title is above the container if they overlap */
+        }
+        .container {
+            background-color: rgba(60, 60, 80, 0.15); /* Semi-transparent for glass effect */
+            backdrop-filter: blur(15px); /* Stronger glass blur effect */
+            -webkit-backdrop-filter: blur(15px); /* For Safari support */
+            border-radius: 2rem; /* Softly rounded corners for glassy look */
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4); /* Deeper, softer shadow */
+            max-width: 600px; /* Max width for the main container */
+            width: 100%;
+            padding: 40px; /* Generous internal spacing */
+            display: flex;
+            flex-direction: column;
+            gap: 25px; /* Gap between elements */
+            position: relative;
+            z-index: 1; /* Ensure container is above the video */
+            border: 1px solid rgba(255, 255, 255, 0.1); /* Subtle, lighter border */
+            overflow: hidden;
+            text-align: center; /* Centers text and inline-block children */
+        }
+        .menu-button {
+            background-color: rgba(72, 187, 120, 0.7); /* Translucent green for Play button */
+            backdrop-filter: blur(8px); /* Frosted glass effect for buttons */
+            -webkit-backdrop-filter: blur(8px);
+            color: #FFFFFF; /* White text */
+            padding: 1.25rem 3rem; /* Generous padding for prominence */
+            border-radius: 1.5rem; /* Softly rounded button */
+            font-weight: 700;
+            font-size: 1.5rem; /* Larger font size for buttons */
+            transition: background-color 0.3s ease, transform 0.1s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.3); /* Softer shadow */
+            border: 1px solid rgba(255, 255, 255, 0.3); /* Subtle border */
+            text-shadow: none;
+            letter-spacing: normal;
+            width: 90%; /* Make buttons span wider, relative to container */
+            margin: 0 auto; /* Centers buttons horizontally within the container */
+        }
+        .menu-button:hover {
+            background-color: rgba(56, 161, 105, 0.9); /* Less transparent on hover */
+            transform: translateY(-7px);
+            box-shadow: 0 12px 20px rgba(0, 0, 0, 0.5);
+        }
+        .menu-button:active {
+            transform: translateY(0);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        /* Style for the "About" button to be slightly different if desired */
+        #about-button {
+            background-color: rgba(99, 179, 237, 0.7); /* Translucent blue for About button */
+            border-color: rgba(255, 255, 255, 0.3); /* Match border style */
+        }
+        #about-button:hover {
+            background-color: rgba(66, 153, 225, 0.9); /* Darker blue on hover */
+        }
+    </style>
+</head>
+<body class="selection:bg-green-300 selection:text-green-900">
+    <video autoplay loop muted playsinline id="background-video">
+        <source src="loading.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+
+    <h1 class="h1">Type Your FATE!</h1>
+    <div class="container">
+        <button id="play-game-btn" class="menu-button">Play</button>
+        <button id="about-button" class="menu-button">About</button>
+    </div>
+
+    <script>
+        document.getElementById('play-game-btn').addEventListener('click', () => {
+            window.location.href = 'game.html'; // Redirect to the main game logic page
+        });
+
+        document.getElementById('about-button').addEventListener('click', () => {
+            window.location.href = 'about.html'; // Redirect to about.html
+        });
+    </script>
+</body>
 </html>
