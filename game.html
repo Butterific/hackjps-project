@@ -93,30 +93,7 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-        .outcome-box {
-            padding: 1.5rem;
-            border-radius: 0.75rem;
-            font-weight: 600;
-            text-align: center;
-            transition: all 0.3s ease-in-out;
-            border: 1px solid;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-        }
-        .outcome-survive {
-            background-color: #2f855a; /* Dark green */
-            border-color: #48bb78; /* Green border */
-            color: #e2e8f0;
-        }
-        .outcome-die {
-            background-color: #c53030; /* Dark red */
-            border-color: #e53e3e; /* Red border */
-            color: #e2e8f0;
-        }
-        .explanation-text {
-            font-weight: 400;
-            margin-top: 0.5rem;
-            color: #cbd5e0;
-        }
+        /* Outcome box styles removed as they are now in outcome.html */
         #timer-display {
             font-size: 1.5rem;
             font-weight: bold;
@@ -145,22 +122,14 @@
                 <div id="timer-display">30s</div>
                 <textarea id="strategy-input" rows="5" placeholder="Describe how you would survive this scenario..."
                           class="w-full text-base focus:ring-2 focus:ring-blue-300"></textarea>
-                <div class="flex justify-center mt-4">
+                <div class="flex justify-center mt-4 gap-4">
                     <button id="submit-strategy-btn" class="btn-primary" disabled>
                         <span class="loading-spinner" id="submit-loading" style="display: none;"></span>
                         Submit Strategy
                     </button>
                 </div>
             </div>
-
-            <div id="outcome-area" class="hidden bg-gray-700 p-6 rounded-xl shadow-lg">
-                <h2 class="text-xl font-semibold text-white mb-2 text-center">Outcome:</h2>
-                <div id="outcome-display" class="outcome-box">
-                    <p class="text-2xl" id="outcome-text"></p>
-                    <p class="explanation-text" id="explanation-text"></p>
-                </div>
-            </div>
-
+            
             <div class="flex justify-center mt-4">
                 <button id="new-game-btn" class="btn-secondary">Start New Game</button>
             </div>
@@ -217,10 +186,6 @@
         const strategyInput = document.getElementById('strategy-input');
         const submitStrategyBtn = document.getElementById('submit-strategy-btn');
         const submitLoadingSpinner = document.getElementById('submit-loading');
-        const outcomeArea = document.getElementById('outcome-area');
-        const outcomeDisplay = document.getElementById('outcome-display');
-        const outcomeText = document.getElementById('outcome-text');
-        const explanationText = document.getElementById('explanation-text');
         const newGameBtn = document.getElementById('new-game-btn');
         const timerDisplay = document.getElementById('timer-display');
 
@@ -274,17 +239,14 @@
         function handleTimerEnd() {
             strategyInput.disabled = true;
             submitStrategyBtn.disabled = true;
-            if (strategyInput.value.trim() === '') {
-                // If no strategy was entered, reveal a default "die" outcome
-                outcomeArea.classList.remove('hidden');
-                outcomeText.textContent = "You DIED!";
-                explanationText.textContent = "Time ran out before you could formulate a strategy. You succumbed to the elements.";
-                outcomeDisplay.classList.add('outcome-die');
-                outcomeDisplay.classList.remove('outcome-survive');
-            }
-            // If a strategy was entered but not submitted, this means the user simply didn't click submit in time.
-            // The existing strategy will remain in the box for review, but no submission occurs.
-            newGameBtn.disabled = false; // Enable new game button
+            const outcomeData = {
+                scenario: currentScenario,
+                strategy: strategyInput.value.trim() || "No strategy entered.",
+                outcome: "die",
+                explanation: "Time ran out before you could formulate a strategy. You succumbed to the elements."
+            };
+            sessionStorage.setItem('gameOutcome', JSON.stringify(outcomeData));
+            window.location.href = 'outcome.html'; // Redirect to outcome page
         }
 
 
@@ -299,17 +261,16 @@
             strategyInput.value = '';
             strategyInput.disabled = false;
             submitStrategyBtn.disabled = true; // Disabled until scenario loads and user types
-            outcomeArea.classList.add('hidden');
-            outcomeDisplay.className = 'outcome-box'; // Reset classes
+            sessionStorage.removeItem('gameOutcome'); // Clear any old outcome data
 
-            // Modified prompt for a much smaller scenario
-            const prompt = "Generate a very brief, single-sentence survival scenario (max 20 words). Focus on an immediate threat and a simple objective.";
+            // Changed prompt for a more detailed and confusing scenario
+            const prompt = "Generate a challenging and confusing survival scenario. Include multiple ambiguous threats or environmental factors, limited resources with unclear utility, and present a complex problem that requires critical thinking. The scenario should be 3-5 sentences long, leaving room for interpretation.";
             
             try {
                 // Call the AI function from ai.js
                 currentScenario = await callGeminiAPI(prompt);
                 scenarioDisplay.textContent = currentScenario;
-                // Only enable submit if there's a scenario and input is not empty
+                // Enable submit if strategy is already typed
                 if (strategyInput.value.trim().length > 0) {
                     submitStrategyBtn.disabled = false;
                 }
@@ -354,28 +315,26 @@
                 // Call the AI function from ai.js for structured response
                 const parsedJson = await callGeminiAPI(prompt, true, responseSchema);
 
-                const outcome = parsedJson.outcome;
-                const explanation = parsedJson.explanation;
+                const outcomeData = {
+                    scenario: currentScenario,
+                    strategy: userStrategy,
+                    outcome: parsedJson.outcome,
+                    explanation: parsedJson.explanation
+                };
+                sessionStorage.setItem('gameOutcome', JSON.stringify(outcomeData));
+                window.location.href = 'outcome.html'; // Redirect to outcome page
 
-                outcomeArea.classList.remove('hidden');
-                outcomeText.textContent = `You ${outcome.toUpperCase()}!`;
-                explanationText.textContent = explanation;
-
-                // Apply styling based on outcome
-                if (outcome === 'survive') {
-                    outcomeDisplay.classList.add('outcome-survive');
-                    outcomeDisplay.classList.remove('outcome-die');
-                } else {
-                    outcomeDisplay.classList.add('outcome-die');
-                    outcomeDisplay.classList.remove('outcome-survive');
-                }
-                submitStrategyBtn.disabled = true; // Disable after submission
-                newGameBtn.disabled = false; // Enable new game button
             } catch (error) {
-                outcomeArea.classList.remove('hidden');
-                outcomeText.textContent = "Error!";
-                explanationText.textContent = "An error occurred while determining your fate.";
                 console.error("Error determining outcome:", error);
+                // If API call fails, still redirect but with an error message
+                const outcomeData = {
+                    scenario: currentScenario,
+                    strategy: userStrategy,
+                    outcome: "error", // Indicate an error state
+                    explanation: "An error occurred while determining your fate. Please try again."
+                };
+                sessionStorage.setItem('gameOutcome', JSON.stringify(outcomeData));
+                window.location.href = 'outcome.html'; // Redirect to outcome page
             } finally {
                 hideLoading(submitStrategyBtn, submitLoadingSpinner);
             }
