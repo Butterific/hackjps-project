@@ -1,1 +1,129 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title> How To Play? </title>
+    <link rel="stylesheet" href="styles.css" />
+    <style>
+      body {
+        font-family: 'Consolas', 'Courier New', monospace; /* Changed font to a coding-like monospace font */
+        background-color: #000000; /* Solid black background */
+        color: #e2e8f0; /* Light text */
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        padding: 20px; /* Reduced padding */
+        box-sizing: border-box;
+        position: relative;
+        overflow-y: auto; /* Allow scrolling for content */
+      }
+      h1 {
+        font-size: 2.2rem; /* Slightly smaller for compactness */
+        font-weight: 800;
+        color: #e2e8f0;
+        text-shadow: none;
+        margin-bottom: 1rem; /* Reduced margin */
+        text-align: center;
+      }
+      h3 {
+        font-size: 1.5rem; /* Slightly smaller */
+        font-weight: 700;
+        color: #9ae6b4; /* Greenish tint for section titles */
+        margin-top: 1rem; /* Reduced margin */
+        margin-bottom: 0.8rem; /* Reduced margin */
+        text-align: center;
+      }
+      h4, h5 {
+        font-size: 1rem; /* Slightly smaller */
+        line-height: 1.4; /* Reduced line height for compactness */
+        color: #cbd5e0;
+        margin-bottom: 0.5rem; /* Reduced margin */
+        text-align: center;
+      }
+      h2 {
+        font-size: 1.3rem; /* Slightly smaller */
+        font-weight: 700;
+        color: #63b3ed; /* Blue for the thank you message */
+        margin-top: 1.5rem; /* Reduced margin */
+        text-align: center;
+      }
+      hr {
+        border: 0;
+        height: 1px;
+        background-image: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(255, 255, 255, 0.15), rgba(0, 0, 0, 0)); /* Slightly less visible hr */
+        margin: 1.5rem 0; /* Reduced margin */
+      }
+      .container-content {
+        background-color: rgba(60, 60, 80, 0.15);
+        backdrop-filter: blur(15px);
+        -webkit-backdrop-filter: blur(15px);
+        border-radius: 2rem;
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4); /* Slightly adjusted shadow */
+        max-width: 650px; /* Slightly narrower for denser text */
+        width: 100%;
+        padding: 2.5rem; /* Reduced padding */
+        display: flex;
+        flex-direction: column;
+        gap: 1rem; /* Reduced gap between elements */
+        position: relative;
+        z-index: 1;
+        border: 1px solid rgba(255, 255, 255, 0.08); /* Fainter border */
+        overflow: hidden;
+        text-align: center;
+      }
+      .btn-back {
+            background-color: rgba(99, 179, 237, 0.4);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            color: #FFFFFF;
+            padding: 0.8rem 2rem; /* Reduced padding */
+            border-radius: 1.25rem; /* Slightly less rounded */
+            font-weight: 700;
+            font-size: 1.1rem; /* Slightly smaller font */
+            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Slightly softer shadow */
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            text-shadow: none;
+            margin-top: 1.5rem; /* Reduced margin */
+            display: inline-block;
+        }
+        .btn-back:hover {
+            background-color: rgba(99, 179, 237, 0.6);
+            transform: translateY(-3px); /* Less pronounced lift */
+            box-shadow: 0 8px 14px rgba(0, 0, 0, 0.4);
+        }
+        .btn-back:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+        }
+    </style>
+  </head>
+  <body>
+    <div class="container-content">
+      <h1> How To Play? </h1>
+      <script src="script.js"></script> <br> <br>
+      <h4> First of All, thanks for visiting our game.  </h4>
+      <h4> Now the main question rises up whenever you play a new game and that is; How Do You Play This Game? </h4>
+      <h4> Well, this is what this page is about. </h4> <hr> <h3> Let's Start </h3> <hr>
+      <h4> Our game starts off with a home page where it says "Play" and "How to Play". When you click on Play it brings you to a new page, where you actually play the game. You can pick your difficulty whether it's easy, medium, or hard. Based upon what difficulty you picked, the AI generates you a scenario. You read off the scenario and then you type in your strategy. After you type in your strategy, you submit it. Based on that, the AI will tell you if you'll survive in this scenario or die. The moment you click NEW GAME your timer starts. Based upon the difficulty you picked, the time decreases. For example, for hard difficulty you have 60 seconds to type in your strategy and then hit submit. If your time is up and you didn't hit submit, then you die automatically. Then you click "New Game" if you want to play it again and the whole process happens all over again, but with another scenario. All of these scenarios are randomly picked and generated through AI. </h4>
+      <hr>
+      <h3> The game is quite easy and self-explanatory. </h3>
+      <hr>
+      <h5> Made at HackJPS 2025, by the participants. </h5>
+      <h2> THANK YOU FOR VISITING OUR GAME AND WE HOPE THAT YOU ENJOY IT! GOOD LUCK </h2>
+      <button id="back-to-main-btn" class="btn-back">Back to Main Menu</button>
+    </div>
+
+    <script>
+      const backButton = document.getElementById('back-to-main-btn');
+      if (backButton) {
+        backButton.addEventListener('click', () => {
+          window.location.href = 'index.html';
+        });
+      }
+    </script>
+  </body>
+</html>
 
