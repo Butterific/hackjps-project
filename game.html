@@ -102,6 +102,32 @@
             margin-top: 1rem;
             margin-bottom: 0.5rem;
         }
+        .difficulty-options {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        .difficulty-option input[type="radio"] {
+            display: none;
+        }
+        .difficulty-option label {
+            background-color: #4a5568;
+            color: #e2e8f0;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s;
+            border: 1px solid #718096;
+        }
+        .difficulty-option input[type="radio"]:checked + label {
+            background-color: #48bb78; /* Green for selected */
+            border-color: #38a169;
+            transform: translateY(-2px);
+        }
+        .difficulty-option label:hover {
+            background-color: #616e7e;
+        }
     </style>
 </head>
 <body class="selection:bg-green-300 selection:text-green-900">
@@ -109,6 +135,24 @@
         <h1 class="text-3xl font-bold text-center text-white mb-4">AI Survival Game</h1>
 
         <div id="game-area" class="flex flex-col gap-6">
+            <div class="bg-gray-700 p-6 rounded-xl shadow-lg">
+                <h2 class="text-xl font-semibold text-white mb-2">Difficulty:</h2>
+                <div class="difficulty-options">
+                    <div class="difficulty-option">
+                        <input type="radio" id="difficulty-easy" name="difficulty" value="easy" checked>
+                        <label for="difficulty-easy">Easy</label>
+                    </div>
+                    <div class="difficulty-option">
+                        <input type="radio" id="difficulty-medium" name="difficulty" value="medium">
+                        <label for="difficulty-medium">Medium</label>
+                    </div>
+                    <div class="difficulty-option">
+                        <input type="radio" id="difficulty-hard" name="difficulty" value="hard">
+                        <label for="difficulty-hard">Hard</label>
+                    </div>
+                </div>
+            </div>
+
             <div class="bg-gray-700 p-6 rounded-xl shadow-lg">
                 <h2 class="text-xl font-semibold text-white mb-2">Scenario:</h2>
                 <p id="scenario-display" class="text-lg text-gray-200 min-h-[4rem] flex items-center justify-center text-center">
@@ -119,7 +163,7 @@
 
             <div class="bg-gray-700 p-6 rounded-xl shadow-lg">
                 <h2 class="text-xl font-semibold text-white mb-2">Your Strategy:</h2>
-                <div id="timer-display">30s</div>
+                <div id="timer-display">90s</div>
                 <textarea id="strategy-input" rows="5" placeholder="Describe how you would survive this scenario..."
                           class="w-full text-base focus:ring-2 focus:ring-blue-300"></textarea>
                 <div class="flex justify-center mt-4 gap-4">
@@ -188,11 +232,19 @@
         const submitLoadingSpinner = document.getElementById('submit-loading');
         const newGameBtn = document.getElementById('new-game-btn');
         const timerDisplay = document.getElementById('timer-display');
+        const difficultyRadios = document.querySelectorAll('input[name="difficulty"]'); // New element selector
 
         let currentScenario = ''; // Store the current scenario
         let timerInterval; // To hold the interval ID for the timer
-        const initialTime = 30; // 30 seconds
-        let timeLeft = initialTime;
+        let timeLeft;
+        let selectedDifficulty = 'easy'; // Default difficulty
+
+        // Define initial times for each difficulty
+        const difficultyTimes = {
+            easy: 120, // 2 minutes
+            medium: 90,  // 1.5 minutes
+            hard: 60   // 1 minute
+        };
 
         // Helper function to show/hide loading spinners
         function showLoading(element, spinner) {
@@ -208,7 +260,7 @@
         // Function to start the timer
         function startTimer() {
             clearInterval(timerInterval); // Clear any existing timer
-            timeLeft = initialTime;
+            timeLeft = difficultyTimes[selectedDifficulty]; // Set time based on difficulty
             timerDisplay.textContent = `${timeLeft}s`;
             timerDisplay.style.color = '#f6ad55'; // Reset color
 
@@ -231,7 +283,7 @@
         // Function to stop the timer
         function stopTimer() {
             clearInterval(timerInterval);
-            timerDisplay.textContent = `${initialTime}s`; // Reset display
+            timerDisplay.textContent = `${difficultyTimes[selectedDifficulty]}s`; // Reset display to current difficulty's time
             timerDisplay.style.color = '#f6ad55'; // Reset color
         }
 
@@ -239,6 +291,9 @@
         function handleTimerEnd() {
             strategyInput.disabled = true;
             submitStrategyBtn.disabled = true;
+            // Disable difficulty selection when game is in progress or ended
+            difficultyRadios.forEach(radio => radio.disabled = true);
+
             const outcomeData = {
                 scenario: currentScenario,
                 strategy: strategyInput.value.trim() || "No strategy entered.",
@@ -248,7 +303,6 @@
             sessionStorage.setItem('gameOutcome', JSON.stringify(outcomeData));
             window.location.href = 'outcome.html'; // Redirect to outcome page
         }
-
 
         // Function to generate a new survival scenario
         async function generateScenario() {
@@ -262,22 +316,42 @@
             strategyInput.disabled = false;
             submitStrategyBtn.disabled = true; // Disabled until scenario loads and user types
             sessionStorage.removeItem('gameOutcome'); // Clear any old outcome data
+            
+            // Enable difficulty selection for a new game
+            difficultyRadios.forEach(radio => radio.disabled = false);
 
-            // Changed prompt for a more detailed and confusing scenario
-            const prompt = "Generate a challenging and confusing survival scenario. Include multiple ambiguous threats or environmental factors, limited resources with unclear utility, and present a complex problem that requires critical thinking. The scenario should be 3-5 sentences long, leaving room for interpretation.";
+            let scenarioPrompt = "";
+            switch (selectedDifficulty) {
+                case 'easy':
+                    scenarioPrompt = "Generate a straightforward survival scenario. It should have clear objectives and obvious resources, designed for easy problem-solving. The scenario should be 2-3 sentences long.";
+                    break;
+                case 'medium':
+                    scenarioPrompt = "Generate a challenging and confusing survival scenario. Include multiple ambiguous threats or environmental factors, limited resources with unclear utility, and present a complex problem that requires critical thinking. The scenario should be 3-5 sentences long, leaving room for interpretation.";
+                    break;
+                case 'hard':
+                    scenarioPrompt = "Generate an extremely difficult and obscure survival scenario. It must contain paradoxical threats, minimal or misleading resources, and demand highly creative and unconventional solutions. The scenario should be 4-6 sentences, designed to be highly ambiguous and potentially unwinnable through conventional means.";
+                    break;
+                default:
+                    scenarioPrompt = "Generate a basic survival scenario."; // Fallback
+            }
             
             try {
                 // Call the AI function from ai.js
-                currentScenario = await callGeminiAPI(prompt);
+                currentScenario = await callGeminiAPI(scenarioPrompt);
                 scenarioDisplay.textContent = currentScenario;
                 // Enable submit if strategy is already typed
                 if (strategyInput.value.trim().length > 0) {
                     submitStrategyBtn.disabled = false;
                 }
                 startTimer(); // Start the timer once the scenario is loaded
+                // Disable difficulty selection once scenario is generated and timer starts
+                difficultyRadios.forEach(radio => radio.disabled = true);
+
             } catch (error) {
                 scenarioDisplay.textContent = "Error generating scenario. Please check your connection.";
                 console.error("Error generating scenario:", error);
+                // Re-enable difficulty selection on error to allow user to try again
+                difficultyRadios.forEach(radio => radio.disabled = false);
             } finally {
                 hideLoading(newGameBtn, scenarioLoadingSpinner);
                 // Ensure spinner is removed from scenarioDisplay if it was added
@@ -300,6 +374,7 @@
 
             showLoading(submitStrategyBtn, submitLoadingSpinner);
             strategyInput.disabled = true; // Disable input while waiting for response
+            difficultyRadios.forEach(radio => radio.disabled = true); // Ensure difficulty stays disabled
 
             const prompt = `Given the following survival scenario: '${currentScenario}'. The user's proposed strategy is: '${userStrategy}'. Based on this, determine if the user 'survives' or 'dies'. Provide a concise explanation (1-2 sentences) for the outcome. Respond only with a JSON object like this: {'outcome': 'survive' or 'die', 'explanation': 'your explanation here'}.`;
             const responseSchema = {
@@ -319,7 +394,8 @@
                     scenario: currentScenario,
                     strategy: userStrategy,
                     outcome: parsedJson.outcome,
-                    explanation: parsedJson.explanation
+                    explanation: parsedJson.explanation,
+                    difficulty: selectedDifficulty // Pass difficulty to outcome page
                 };
                 sessionStorage.setItem('gameOutcome', JSON.stringify(outcomeData));
                 window.location.href = 'outcome.html'; // Redirect to outcome page
@@ -331,7 +407,8 @@
                     scenario: currentScenario,
                     strategy: userStrategy,
                     outcome: "error", // Indicate an error state
-                    explanation: "An error occurred while determining your fate. Please try again."
+                    explanation: "An error occurred while determining your fate. Please try again.",
+                    difficulty: selectedDifficulty
                 };
                 sessionStorage.setItem('gameOutcome', JSON.stringify(outcomeData));
                 window.location.href = 'outcome.html'; // Redirect to outcome page
@@ -344,6 +421,14 @@
         newGameBtn.addEventListener('click', generateScenario);
         submitStrategyBtn.addEventListener('click', submitStrategy);
 
+        // Event listener for difficulty selection
+        difficultyRadios.forEach(radio => {
+            radio.addEventListener('change', (event) => {
+                selectedDifficulty = event.target.value;
+                stopTimer(); // Reset timer display when difficulty changes
+            });
+        });
+
         // Enable/disable submit button based on strategy input and scenario presence
         strategyInput.addEventListener('input', () => {
             if (strategyInput.value.trim().length > 0 && currentScenario && timeLeft > 0) {
@@ -355,9 +440,11 @@
 
         // Initial setup on page load
         window.onload = function() {
-            // Set initial timer display
-            timerDisplay.textContent = `${initialTime}s`;
+            // Set initial timer display based on default difficulty
+            timerDisplay.textContent = `${difficultyTimes[selectedDifficulty]}s`;
             // The "Start New Game" button is ready to be clicked to begin.
+            // Ensure difficulty radios are enabled on load
+            difficultyRadios.forEach(radio => radio.disabled = false);
         };
 
     </script>
