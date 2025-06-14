@@ -1,10 +1,4 @@
-// ai.js
-// This file exports your Gemini API key and a function for interacting with the Gemini API.
 
-// IMPORTANT: For production applications, it's highly recommended to store API keys
-// securely on a server-side environment (e.g., using environment variables)
-// and make API calls from your backend, not directly from client-side code.
-// This is for demonstration purposes only.
 export const GEMINI_API_KEY = "AIzaSyB-qmJFk7kpEKkoDC2O4ad80Yb58yfXK60";
 
 /**
