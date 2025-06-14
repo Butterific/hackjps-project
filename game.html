@@ -3,80 +3,112 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Survival Game</title>
+    <title>Type Your Fate</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #1a202c; /* Dark background */
+            background-color: #000000; /* Solid black background */
             color: #e2e8f0; /* Light text */
             display: flex;
             justify-content: center;
             align-items: flex-start; /* Align to top to allow scrolling if content is long */
             min-height: 100vh;
-            padding: 20px;
+            padding: 40px; /* Increased padding for more spacious body */
             box-sizing: border-box;
+            position: relative;
+            overflow-y: auto; /* Ensure scrolling is possible if content exceeds height */
         }
         .container {
-            background-color: #2d3748; /* Darker background for container */
-            border-radius: 1rem;
-            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.5);
-            max-width: 768px; /* Max width for readability */
+            background-color: rgba(60, 60, 80, 0.15); /* Semi-transparent for glass effect */
+            backdrop-filter: blur(15px); /* Stronger glass blur effect */
+            -webkit-backdrop-filter: blur(15px); /* For Safari support */
+            border-radius: 2rem; /* Even more rounded */
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4); /* Deeper, softer shadow for floating effect */
+            max-width: 800px; /* Slightly wider for spaciousness */
             width: 100%;
-            padding: 2.5rem;
+            padding: 3.5rem; /* More internal spacing */
             display: flex;
             flex-direction: column;
-            gap: 1.5rem;
+            gap: 2rem; /* Increased gap between sections */
+            position: relative;
+            z-index: 1;
+            border: 1px solid rgba(255, 255, 255, 0.1); /* Subtle, lighter border */
+            overflow: hidden; /* Ensure blur doesn't leak */
+            flex-shrink: 0;
+        }
+        h1, h2 {
+            text-shadow: none; /* Removed text shadow for a cleaner look */
+            color: #e2e8f0; /* Ensure white text for headings */
+        }
+        .bg-gray-700 { /* For scenario, strategy, difficulty boxes */
+            background-color: rgba(90, 100, 120, 0.15); /* Very transparent */
+            backdrop-filter: blur(8px); /* Frosted effect for inner boxes */
+            -webkit-backdrop-filter: blur(8px);
+            border-radius: 1.5rem; /* More rounded */
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2); /* Softer, subtle shadow */
+            padding: 2rem; /* More internal spacing */
+            border: 1px solid rgba(255, 255, 255, 0.08); /* Fainter border */
         }
         .btn-primary {
-            background-color: #48bb78; /* Green */
+            background-color: rgba(56, 161, 105, 0.5); /* Translucent green */
             color: white;
-            padding: 0.75rem 1.5rem;
-            border-radius: 0.75rem;
-            font-weight: 600;
-            transition: background-color 0.2s;
+            padding: 1rem 2rem; /* Larger padding */
+            border-radius: 1.25rem; /* More rounded button */
+            font-weight: 700;
+            transition: background-color 0.3s ease, transform 0.1s ease, box-shadow 0.3s ease;
             cursor: pointer;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            border: none;
+            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.2); /* Subtle border for glass effect */
+            text-shadow: none;
         }
         .btn-primary:hover:not(:disabled) {
-            background-color: #38a169;
+            background-color: rgba(72, 187, 120, 0.7); /* Less transparent on hover */
+            transform: translateY(-5px);
+            box-shadow: 0 10px 18px rgba(0, 0, 0, 0.4);
         }
         .btn-primary:disabled {
-            background-color: #4a5568; /* Grayed out when disabled */
+            background-color: rgba(74, 85, 104, 0.3); /* Grayed out with transparency */
             cursor: not-allowed;
+            border-color: rgba(255, 255, 255, 0.1);
         }
         .btn-secondary {
-            background-color: #63b3ed; /* Blue */
+            background-color: rgba(99, 179, 237, 0.5); /* Translucent blue */
             color: white;
-            padding: 0.75rem 1.5rem;
-            border-radius: 0.75rem;
-            font-weight: 600;
-            transition: background-color 0.2s;
+            padding: 1rem 2rem; /* Larger padding */
+            border-radius: 1.25rem; /* More rounded button */
+            font-weight: 700;
+            transition: background-color 0.3s ease, transform 0.1s ease, box-shadow 0.3s ease;
             cursor: pointer;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            border: none;
+            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.2); /* Subtle border for glass effect */
+            text-shadow: none;
         }
         .btn-secondary:hover:not(:disabled) {
-            background-color: #4299e1;
+            background-color: rgba(66, 153, 225, 0.7); /* Less transparent on hover */
+            transform: translateY(-5px);
+            box-shadow: 0 10px 18px rgba(0, 0, 0, 0.4);
         }
         .btn-secondary:disabled {
-            background-color: #4a5568; /* Grayed out when disabled */
+            background-color: rgba(74, 85, 104, 0.3); /* Grayed out with transparency */
             cursor: not-allowed;
+            border-color: rgba(255, 255, 255, 0.1);
         }
         textarea {
-            background-color: #4a5568; /* Darker input background */
-            border: 1px solid #718096;
-            border-radius: 0.5rem;
-            padding: 1rem;
+            background-color: rgba(74, 85, 104, 0.1); /* More transparent input background */
+            border: 1px solid rgba(113, 128, 150, 0.3); /* Translucent border */
+            border-radius: 0.75rem; /* More rounded */
+            padding: 1.25rem; /* More padding */
             color: #e2e8f0;
-            resize: vertical; /* Allow vertical resize */
+            resize: vertical;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle inner shadow */
+            transition: border-color 0.2s, box-shadow 0.2s;
         }
         textarea:focus {
             outline: none;
-            border-color: #63b3ed;
-            box-shadow: 0 0 0 3px rgba(99, 179, 237, 0.5);
+            border-color: rgba(99, 179, 237, 0.7); /* Brighter translucent border on focus */
+            box-shadow: 0 0 0 4px rgba(99, 179, 237, 0.2); /* Softer focus ring */
         }
         .loading-spinner {
             border: 4px solid rgba(255, 255, 255, 0.3);
@@ -93,40 +125,53 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-        /* Outcome box styles removed as they are now in outcome.html */
         #timer-display {
-            font-size: 1.5rem;
-            font-weight: bold;
+            font-size: 1.8rem; /* Larger timer text */
+            font-weight: 700; /* Bolder */
             color: #f6ad55; /* Orange for timer */
             text-align: center;
-            margin-top: 1rem;
-            margin-bottom: 0.5rem;
+            margin-top: 1.5rem; /* More space */
+            margin-bottom: 1rem; /* More space */
+            text-shadow: none;
         }
         .difficulty-options {
             display: flex;
             justify-content: center;
-            gap: 1rem;
-            margin-bottom: 1rem;
+            gap: 1.5rem; /* Increased gap */
+            margin-bottom: 1.5rem; /* More space */
         }
         .difficulty-option input[type="radio"] {
             display: none;
         }
         .difficulty-option label {
-            background-color: #4a5568;
+            background-color: rgba(74, 85, 104, 0.3); /* Translucent */
             color: #e2e8f0;
-            padding: 0.5rem 1rem;
-            border-radius: 0.5rem;
+            padding: 0.75rem 1.5rem; /* More padding */
+            border-radius: 0.75rem; /* More rounded */
             cursor: pointer;
-            transition: background-color 0.2s, transform 0.1s;
-            border: 1px solid #718096;
+            transition: background-color 0.2s, transform 0.1s, border-color 0.2s;
+            border: 1px solid rgba(113, 128, 150, 0.2); /* Translucent border */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
         .difficulty-option input[type="radio"]:checked + label {
-            background-color: #48bb78; /* Green for selected */
-            border-color: #38a169;
+            background-color: rgba(72, 187, 120, 0.5); /* Brighter translucent green when selected */
+            border-color: rgba(72, 187, 120, 0.7);
             transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
         .difficulty-option label:hover {
-            background-color: #616e7e;
+            background-color: rgba(97, 110, 126, 0.5); /* Less transparent on hover */
+        }
+        .difficulty-option input[type="radio"]:disabled + label {
+            background-color: rgba(74, 85, 104, 0.1); /* More transparent when disabled */
+            cursor: not-allowed;
+            opacity: 0.7;
+            border-color: rgba(113, 128, 150, 0.1);
+        }
+        /* Increased spacing for text content */
+        p.text-lg {
+            line-height: 1.7; /* More space between lines */
+            letter-spacing: 0.02em; /* Slight letter spacing for readability */
         }
     </style>
 </head>
@@ -134,49 +179,47 @@
     <div class="container">
         <h1 class="text-3xl font-bold text-center text-white mb-4">AI Survival Game</h1>
 
-        <div id="game-area" class="flex flex-col gap-6">
-            <div class="bg-gray-700 p-6 rounded-xl shadow-lg">
-                <h2 class="text-xl font-semibold text-white mb-2">Difficulty:</h2>
-                <div class="difficulty-options">
-                    <div class="difficulty-option">
-                        <input type="radio" id="difficulty-easy" name="difficulty" value="easy" checked>
-                        <label for="difficulty-easy">Easy</label>
-                    </div>
-                    <div class="difficulty-option">
-                        <input type="radio" id="difficulty-medium" name="difficulty" value="medium">
-                        <label for="difficulty-medium">Medium</label>
-                    </div>
-                    <div class="difficulty-option">
-                        <input type="radio" id="difficulty-hard" name="difficulty" value="hard">
-                        <label for="difficulty-hard">Hard</label>
-                    </div>
+        <div class="bg-gray-700 p-6 rounded-xl shadow-lg">
+            <h2 class="text-xl font-semibold text-white mb-2">Difficulty:</h2>
+            <div class="difficulty-options">
+                <div class="difficulty-option">
+                    <input type="radio" id="difficulty-easy" name="difficulty" value="easy" checked>
+                    <label for="difficulty-easy">Easy</label>
+                </div>
+                <div class="difficulty-option">
+                    <input type="radio" id="difficulty-medium" name="difficulty" value="medium">
+                    <label for="difficulty-medium">Medium</label>
+                </div>
+                <div class="difficulty-option">
+                    <input type="radio" id="difficulty-hard" name="difficulty" value="hard">
+                    <label for="difficulty-hard">Hard</label>
                 </div>
             </div>
+        </div>
 
-            <div class="bg-gray-700 p-6 rounded-xl shadow-lg">
-                <h2 class="text-xl font-semibold text-white mb-2">Scenario:</h2>
-                <p id="scenario-display" class="text-lg text-gray-200 min-h-[4rem] flex items-center justify-center text-center">
-                    <span class="loading-spinner" id="scenario-loading" style="display: none;"></span>
-                    <span id="scenario-text">Click "Start New Game" to generate a scenario.</span>
-                </p>
-            </div>
+        <div class="bg-gray-700 p-6 rounded-xl shadow-lg">
+            <h2 class="text-xl font-semibold text-white mb-2">Scenario:</h2>
+            <p id="scenario-display" class="text-lg text-gray-200 min-h-[4rem] flex items-center justify-center text-center">
+                <span class="loading-spinner" id="scenario-loading" style="display: none;"></span>
+                <span id="scenario-text">Click "Start New Game" to generate a scenario.</span>
+            </p>
+        </div>
 
-            <div class="bg-gray-700 p-6 rounded-xl shadow-lg">
-                <h2 class="text-xl font-semibold text-white mb-2">Your Strategy:</h2>
-                <div id="timer-display">90s</div>
-                <textarea id="strategy-input" rows="5" placeholder="Describe how you would survive this scenario..."
-                          class="w-full text-base focus:ring-2 focus:ring-blue-300"></textarea>
-                <div class="flex justify-center mt-4 gap-4">
-                    <button id="submit-strategy-btn" class="btn-primary" disabled>
-                        <span class="loading-spinner" id="submit-loading" style="display: none;"></span>
-                        Submit Strategy
-                    </button>
-                </div>
+        <div class="bg-gray-700 p-6 rounded-xl shadow-lg">
+            <h2 class="text-xl font-semibold text-white mb-2">Your Strategy:</h2>
+            <div id="timer-display">90s</div>
+            <textarea id="strategy-input" rows="5" placeholder="Describe how you would survive this scenario..."
+                      class="w-full text-base focus:ring-2 focus:ring-blue-300"></textarea>
+            <div class="flex justify-center mt-4 gap-4">
+                <button id="submit-strategy-btn" class="btn-primary" disabled>
+                    <span class="loading-spinner" id="submit-loading" style="display: none;"></span>
+                    Submit Strategy
+                </button>
             </div>
-            
-            <div class="flex justify-center mt-4">
-                <button id="new-game-btn" class="btn-secondary">Start New Game</button>
-            </div>
+        </div>
+        
+        <div class="flex justify-center mt-4">
+            <button id="new-game-btn" class="btn-secondary">Start New Game</button>
         </div>
     </div>
 
