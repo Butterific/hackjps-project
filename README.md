@@ -14,5 +14,5 @@ we ran into a lot of formating/gemeni api problems
 we are proud of the entire website and the formating!
 ## What we learned
 we learned that making a website even with the help of ai is not easy and can come with a lot of challengs espcially with apis. 
-## What's next for Type Yout FATE!
+## What's next for Type Your FATE!
 Im going to try to get this game to more sites and make bigger and better projects. 
